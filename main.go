@@ -18,7 +18,11 @@ func main() {
 	beast := NewMonster()
 	beast.showMonster()
 
-	*beast = slayMonster(*beast, ONE_HEAD, 1)
+	*beast = slayMonster(*beast, ONE_HEAD, 0)
+	if (beast.Death()) {
+		// we're done :)
+
+	}
 }
 
 type TryMove int32
@@ -39,41 +43,20 @@ var Move_name = map[int]string{
 
 func slayMonster(m monster, move TryMove, turns int) monster {
 	fmt.Print("Turn:", turns)
-	if turns >= 12 || m.MonsterWins() {
-		// we did not succeed in slaying the beast
-		fmt.Println("no turns left..")
+	if turns >= 12 || m.MonsterWins() || m.Death() {
+		// we either did not succeed in the amount of time allotted,
+		// or we lost, or we won. Either way we are at the end of our tries:
+		fmt.Print(".")
 		return m
 	}
 
-	switch move {
-	case ONE_HEAD:
-		if m.heads > 0 {
-			fmt.Print("One head..")
-		}
-	case TWO_HEADS:
-		if m.heads > 1 {
-			fmt.Print("Two heads..")
-			m.heads -= 2
-			m.trackmoves[turns] = TWO_HEADS
-		}
-	case ONE_TAIL:
-		if m.tails > 0 {
-			fmt.Print("One tail..")
-			m.tails++
-			m.trackmoves[turns] = ONE_TAIL
-		}
-	case TWO_TAILS:
-		if m.tails > 1 {
-			fmt.Print("Two tails..")
-			m.tails -= 2
-			m.heads++
-			m.trackmoves[turns] = TWO_TAILS
-		}
-	}
+	m.ExecuteMove(move, turns)
+
 	m.showMonster()
 
 	if m.Death() {
 		fmt.Println("Yes! We slayed the monster!")
+
 		m.PrintMoves()
 		os.Exit(0)
 		return m
@@ -94,6 +77,32 @@ func slayMonster(m monster, move TryMove, turns int) monster {
 	return m
 }
 
+func (m *monster) ExecuteMove(move TryMove, turn int) {
+	fmt.Println(Move_name[int(move)])
+	switch move {
+	case ONE_HEAD:
+		if m.heads > 0 {
+
+		}
+	case TWO_HEADS:
+		if m.heads > 1 {
+			m.heads -= 2
+			m.trackmoves[turn] = TWO_HEADS
+		}
+	case ONE_TAIL:
+		if m.tails > 0 {
+			m.tails++
+			m.trackmoves[turn] = ONE_TAIL
+		}
+	case TWO_TAILS:
+		if m.tails > 1 {
+			m.tails -= 2
+			m.heads++
+			m.trackmoves[turn] = TWO_TAILS
+		}
+	}
+}
+
 // Monster holds the number of heads and tails
 type monster struct {
 	heads      int
@@ -110,26 +119,29 @@ func NewMonster() *monster {
 	m.trackmoves = make([]TryMove, 12)
 	return m
 }
-func (m monster) showMonster() {
+func (m *monster) showMonster() {
 	fmt.Printf("%+v", m)
 }
 
-func (m monster) Death() bool {
+func (m *monster) Death() bool {
 	if m.heads == 0 && m.tails == 0 {
 		return true
 	}
 	return false
 }
 
-func (m monster) MonsterWins() bool {
+func (m *monster) MonsterWins() bool {
 	if m.heads == 1 && m.tails == 0 {
 		return true
 	}
 	return false
 }
 
-func (m monster) PrintMoves() {
-	for i := range m.trackmoves {
-		fmt.Print(Move_name[i])
+func (m *monster) PrintMoves() {
+	printmonster := NewMonster()
+	for i := 0; i< len(m.trackmoves);i++ {
+		printmonster.ExecuteMove(m.trackmoves[i],i)
+
+		fmt.Printf("%+v", printmonster)
 	}
 }
