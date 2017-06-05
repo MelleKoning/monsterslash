@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"os"
+	//"os"
 )
 
 func main() {
@@ -15,13 +15,19 @@ func main() {
 	fmt.Println("4. Slash off TWO TAILS. Result: one head will grow back.")
 	fmt.Println("Can you slay the monster, and in how many turns?")
 
-	beast := NewMonster()
-	beast.showMonster()
 
-	*beast = slayMonster(*beast, ONE_HEAD, 0)
-	if (beast.Death()) {
-		// we're done :)
-
+	fmt.Println("start.")
+	for maxturns := 1; maxturns<11; maxturns++ {
+		fmt.Println("Maxturns depth %d", maxturns)
+		beast := NewMonster()
+		beast.showMonster()
+		*beast = slayMonster(*beast, 0, maxturns)
+		if (beast.Death()) {
+			// we're done :)
+			fmt.Println("Yes! We slayed the monster!")
+			beast.PrintMoves()
+			break; // break out of the loop
+		}
 	}
 }
 
@@ -34,51 +40,34 @@ const (
 	TWO_TAILS TryMove = 3
 )
 
-var Move_name = map[int]string{
-	0: "ONE_HEAD",
-	1: "TWO_HEADS",
-	2: "ONE_TAIL",
-	3: "TWO_TAILS",
+var Move_name = map[TryMove]string{
+	ONE_HEAD: "ONE_HEAD",
+	TWO_HEADS: "TWO_HEADS",
+	ONE_TAIL: "ONE_TAIL",
+	TWO_TAILS: "TWO_TAILS",
 }
 
-func slayMonster(m monster, move TryMove, turns int) monster {
+func slayMonster(m monster, turns int, maxturns int) monster {
 	fmt.Print("Turn:", turns)
-	if turns >= 12 || m.MonsterWins() || m.Death() {
+	m.showMonster()
+	if turns > maxturns || m.MonsterWins() || m.Death() {
 		// we either did not succeed in the amount of time allotted,
 		// or we lost, or we won. Either way we are at the end of our tries:
 		fmt.Print(".")
 		return m
 	}
-
-	m.ExecuteMove(move, turns)
-
-	m.showMonster()
-
-	if m.Death() {
-		fmt.Println("Yes! We slayed the monster!")
-
-		m.PrintMoves()
-		os.Exit(0)
-		return m
+	for idx, _ := range Move_name {
+		beast := m
+		beast.ExecuteMove(idx, turns)
+		result := slayMonster(beast, turns+1, maxturns)
+		if result.Death() {return result}
 	}
-	slayMonster(m, TWO_HEADS, turns+1)
-	if m.Death() {
-		return m
-	}
-	slayMonster(m, ONE_TAIL, turns+1)
-	if m.Death() {
-		return m
-	}
-	slayMonster(m, TWO_TAILS, turns+1)
 
-	if m.Death() {
-		return m
-	}
 	return m
 }
 
 func (m *monster) ExecuteMove(move TryMove, turn int) {
-	fmt.Println(Move_name[int(move)])
+	fmt.Println(Move_name[move])
 	switch move {
 	case ONE_HEAD:
 		if m.heads > 0 {
@@ -140,8 +129,9 @@ func (m *monster) MonsterWins() bool {
 func (m *monster) PrintMoves() {
 	printmonster := NewMonster()
 	for i := 0; i< len(m.trackmoves);i++ {
+		fmt.Printf("%+v", printmonster)
 		printmonster.ExecuteMove(m.trackmoves[i],i)
 
-		fmt.Printf("%+v", printmonster)
+
 	}
 }
