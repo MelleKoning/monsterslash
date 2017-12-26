@@ -30,6 +30,7 @@ func main() {
 	}
 }
 
+// TryMove is the type definining the four possible moves of the player
 type TryMove int32
 
 const (
@@ -67,6 +68,8 @@ func slayMonster(m Monster, turns int, maxturns int) Monster {
 	return m
 }
 
+// ExecuteMove slashes into the monster with move TryMove and
+// ensures the moves is tracked in the trackmoves list at place 'turn'
 func (m *Monster) ExecuteMove(move TryMove, turn int) {
 	// fmt.Println(Move_name[move])
 	switch move {
@@ -113,6 +116,7 @@ func (m *Monster) showMonster() {
 	fmt.Printf("%+v", m)
 }
 
+// Death tells if the monster has been slain
 func (m *Monster) Death() bool {
 	if m.heads == 0 && m.tails == 0 {
 		return true
@@ -120,6 +124,7 @@ func (m *Monster) Death() bool {
 	return false
 }
 
+// MonsterWins tells if the monster has become invincible
 func (m *Monster) MonsterWins() bool {
 	if m.heads == 1 && m.tails == 0 {
 		return true
@@ -127,6 +132,8 @@ func (m *Monster) MonsterWins() bool {
 	return false
 }
 
+// PrintMoves is to be called when monster is slain to show what moves let to this
+// the program stores earlier moves in the trackmoves list
 func (m *Monster) PrintMoves(turns int) {
 	printmonster := NewMonster()
 	for i := 0; i <= turns; i++ {
