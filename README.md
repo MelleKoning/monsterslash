@@ -11,4 +11,5 @@ Let's slash a monster. Here are the rules:")
 The question is:
 Can you slay the monster, and in how many turns?
 
-This program is 
+This program is better explained at the following blogpost
+http://www.mellekoning.nl/index.php/2017/07/16/how-to-slay-the-dragon/
